@@ -18,19 +18,58 @@ model User {
     followers  Int              @default(0)
     role       Role             @default(USER)
     profile    ExtendedProfile?
+    Blogs      Blogs[]
     created_at DateTime         @default(now())
     updated_at DateTime         @updatedAt
 }
 
 model ExtendedProfile {
-    id            String  @id @default(uuid())
-    userId        String  @unique
+    id            String   @id @default(uuid())
+    userId        String   @unique
     bio           String?
     portfolioLink String?
     skills        String?
     workAt        String?
     workExp       String?
-    User          User?   @relation(fields: [userId], references: [id])
+    User          User?    @relation(fields: [userId], references: [id])
+    created_at    DateTime @default(now())
+    updated_at    DateTime @updatedAt
+}
+
+// model Tag {
+//     id    String  @id @default(uuid())
+//     name  String  @unique
+//     posts Posts[] @relation("PostTags")
+// }
+
+// model Like {
+//     id        String   @id @default(uuid())
+//     postId    String
+//     userId    String
+//     post      Posts    @relation(fields: [postId], references: [id])
+//     user      User     @relation(fields: [userId], references: [id])
+//     createdAt DateTime @default(now())
+// }
+
+// model Comment {
+//     id        String   @id @default(uuid())
+//     postId    String
+//     userId    String
+//     content   String
+//     createdAt DateTime @default(now())
+//     post      Posts    @relation(fields: [postId], references: [id])
+//     user      User     @relation(fields: [userId], references: [id])
+// }
+
+model Blogs {
+    id         String    @id @default(uuid())
+    title      String
+    content    String
+    metaDesc   String?
+    user       User?     @relation(fields: [userId], references: [id])
+    userId     String?
+    created_at DateTime  @default(now())
+    updated_at DateTime  @updatedAt
 }
 
 enum Role {
