@@ -30,6 +30,7 @@ profileRouter.get("/", protectedRoute, async (c) => {
 
     const user = await prisma.user.findUnique({
       where: {
+        // @ts-ignore
         email: token.email,
       },
       select: {
@@ -70,6 +71,7 @@ profileRouter.put("/update", protectedRoute, async (c) => {
     }
 
     const userUpdated = await prisma.user.update({
+      // @ts-ignore
       where: { email: token.email },
       data: body,
     });
@@ -95,13 +97,39 @@ profileRouter.delete("/delete/account", protectedRoute, async (c) => {
   }).$extends(withAccelerate());
 
   try {
-
     const token = c.get("userToken");
-    const body = await c.req.json();
 
+    const user = await prisma.user.findUnique({
+      where: {
+        // @ts-ignore
+        email: token.email,
+        // @ts-ignore
+        fullName: token.fullName,
+      },
+    });
 
+    console.log(user);
 
+    if (!user) {
+      c.status(403);
+      return c.json({ message: "user not found!" });
+    }
+
+    await prisma.user.delete({
+      where: {
+        // @ts-ignore
+        email: token.email,
+        // @ts-ignore
+        fullName: token.fullName,
+      },
+    });
+
+    c.status(200);
+    return c.json({ message: "account successfully deleted" });
   } catch (err) {
+    console.log(err);
+    c.status(500);
+    return c.json({ message: "internal server error!" });
   } finally {
     await prisma.$disconnect();
   }

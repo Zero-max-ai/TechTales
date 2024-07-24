@@ -59,13 +59,15 @@ authRouter.post("/login", async (c) => {
     const cookieName = "techttales_jwt";
     const maxAge = 60 * 60 * 24; // 1 day in seconds
 
-    // add the c.header('Set-Cookie', `${cookieName}=${cookieValue}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Strict`);
-    // from there - https://chatgpt.com/c/9e42656d-94cd-496a-888c-e490b1b5165b
-    c.header(
-      c.env.COOKIE_STRING,
-      `${cookieName}=${token}; Max-Age=${maxAge}; HttpOnly; Secure;`
-    );
-    // c.header("Set-Cookie", cookie);
+    // // add the c.header('Set-Cookie', `${cookieName}=${cookieValue}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+    // // from there - https://chatgpt.com/c/9e42656d-94cd-496a-888c-e490b1b5165b
+    // c.header(
+    //   c.env.COOKIE_STRING,
+    //   `${cookieName}=${token}; Max-Age=${maxAge}; HttpOnly; Secure;`
+    // );
+    // // c.header("Set-Cookie", cookie);
+
+    c.header('Authorization', `Bearer ${token}`)
 
     c.status(200);
     return c.json({ message: "this is login router", token });
