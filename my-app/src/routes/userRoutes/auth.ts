@@ -30,6 +30,7 @@ authRouter.post("/login", async (c) => {
     const user = await prisma.user.findUnique({
       where: { email: email },
       select: {
+        id: true,
         email: true,
         password: true,
         fullName: true,
@@ -48,6 +49,7 @@ authRouter.post("/login", async (c) => {
     }
 
     const jwtPayload = {
+      id: user?.id,
       email: email,
       fullName: user?.fullName,
       counrty: user?.country,
@@ -57,15 +59,7 @@ authRouter.post("/login", async (c) => {
     const token = await sign(jwtPayload, c.env.JWT_TOKEN);
 
     const cookieName = "techttales_jwt";
-    const maxAge = 60 * 60 * 24; // 1 day in seconds
-
-    // // add the c.header('Set-Cookie', `${cookieName}=${cookieValue}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Strict`);
-    // // from there - https://chatgpt.com/c/9e42656d-94cd-496a-888c-e490b1b5165b
-    // c.header(
-    //   c.env.COOKIE_STRING,
-    //   `${cookieName}=${token}; Max-Age=${maxAge}; HttpOnly; Secure;`
-    // );
-    // // c.header("Set-Cookie", cookie);
+    const maxAge = 60 * 60 * 24; 
 
     c.header('Authorization', `Bearer ${token}`)
 

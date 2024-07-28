@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { protectedRoute } from "./middleware";
+import { sign } from 'hono/jwt'
 
 type Bindings = {
   DATABASE_URL: string;
@@ -81,8 +82,17 @@ profileRouter.put("/update", protectedRoute, async (c) => {
       return c.json({ message: "Something wrong here!" });
     }
 
+		const jwtPayload = {
+			email: body.email || token.email,
+			fullName: body.fullName || token.fullName,
+			country: body.country || token.country,
+			role: 'User'
+		}
+		const updatedToken = await sign(jwtPayload, c.env.JWT_TOKEN);
+		c.header('Authorization', `Bearer ${updatedToken}`);
+
     c.status(201);
-    return c.json({ message: "profile updated successfully!" });
+    return c.json({ message: "profile updated successfully!", token: updatedToken });
   } catch (err) {
     c.status(500);
     return c.json({ message: "internal server error!" });

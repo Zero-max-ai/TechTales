@@ -18,6 +18,7 @@ const blogRouter = new Hono<{
   Variables: Variables;
 }>();
 
+// @desc- fetching all the blogs contian in db --- add the pagination and make it performant
 blogRouter.get("/all", protectedRoute, async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -42,27 +43,99 @@ blogRouter.get("/all", protectedRoute, async (c) => {
   }
 });
 
-blogRouter.get("/blog/:id", async (c) => {});
-
-blogRouter.get("/my/blogs", async (c) => {});
-
-blogRouter.get("/my/blog/:id", async (c) => {});
-
-blogRouter.post("/new-blog", async (c) => {
+// @desc- fetch the single blog --- not working
+blogRouter.get("/blog/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate());
+  });
+
   try {
-    const { title, metaDesc, content } = await c.req.json();
-    console.log(title, metaDesc, content);
-    c.status(201);
-    return c.json({ message: "new blog created!" });
+    const id = c.req.param("id");
+    const token = c.get("userToken");
+    console.log(c.req.param);
+    const blog = await prisma.blogs.findUnique({
+      where: { id: id },
+    });
+
+    if (!blog) {
+      c.status(404);
+      return c.json({ message: "unable to fetch the blog" });
+    }
+
+    c.status(200);
+    return c.json({ message: c.req.param });
+  } catch (err) {
+    c.status(500);
+    return c.json({ message: "something went wrong" });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
+// @desc - owner blogs get route
+blogRouter.get("/my/blogs", protectedRoute, async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  });
+
+  try {
+    const token = c.get("userToken");
+
+    const userBlogs = await prisma.blogs.findMany({
+      where: {
+        // @ts-ignore
+        userId: token.id,
+      },
+    });
+
+    if (!userBlogs) {
+      c.status(404);
+      return c.json({ message: "unable to find your blogs!" });
+    }
+
+    c.status(200);
+    return c.json({ message: userBlogs });
   } catch (err) {
     console.log(err);
     c.status(500);
-    return c.json({ message: "unable to create new blogs!" });
+    return c.json({ message: "something went wrong!" });
   } finally {
     await prisma.$disconnect();
+  }
+});
+
+// think about this route for now!
+blogRouter.get("/my/blogs/:id", async (c) => {});
+
+//	@desc - new blog route with post route
+blogRouter.post("/new", protectedRoute, async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  });
+  try {
+    const token = c.get("userToken");
+    const { title, metaDesc, content } = await c.req.json();
+
+    const blog = await prisma.blogs.create({
+      data: {
+        title: title,
+        metaDesc: metaDesc,
+        content: content,
+        userId: token?.id,
+      },
+    });
+
+    if (!blog) {
+      c.status(500);
+      return c.json({ message: "unable to create blog!" });
+    }
+
+    c.status(201);
+    return c.json({ message: "blog created!" });
+  } catch (err) {
+    console.log(err);
+    c.status(500);
+    return c.json({ message: "unable to create new blog!" });
   }
 });
 
