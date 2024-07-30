@@ -121,6 +121,7 @@ blogRouter.post("/new", protectedRoute, async (c) => {
         title: title,
         metaDesc: metaDesc,
         content: content,
+        // @ts-ignore
         userId: token?.id,
       },
     });
