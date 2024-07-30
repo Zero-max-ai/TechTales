@@ -34,7 +34,6 @@ authRouter.post("/login", async (c) => {
         email: true,
         password: true,
         fullName: true,
-        country: true,
       },
     });
 
@@ -52,7 +51,6 @@ authRouter.post("/login", async (c) => {
       id: user?.id,
       email: email,
       fullName: user?.fullName,
-      counrty: user?.country,
       role: "User",
     };
     // store this token
@@ -99,7 +97,6 @@ authRouter.post("/register", async (c) => {
     const jwtPayload = {
       email: email,
       fullName: fullName,
-      counrty: country,
       role: "User",
     };
     const token = await sign(jwtPayload, c.env.JWT_TOKEN);
@@ -109,10 +106,7 @@ authRouter.post("/register", async (c) => {
       data: {
         email: email,
         password: hashedPassword,
-        fullName: fullName,
-        country: country,
-        dob: formattedDob,
-        gender: gender,
+        fullName: fullName
       },
     });
 

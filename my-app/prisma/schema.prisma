@@ -12,9 +12,6 @@ model User {
     fullName   String
     email      String           @unique
     password   String
-    gender     String
-    country    String
-    dob        String
     followers  Int              @default(0)
     role       Role             @default(USER)
     profile    ExtendedProfile?
@@ -26,6 +23,9 @@ model User {
 model ExtendedProfile {
     id            String   @id @default(uuid())
     userId        String   @unique
+    gender  String?
+    dob String?
+    country String?
     bio           String?
     portfolioLink String?
     skills        String?
@@ -66,8 +66,8 @@ model Blogs {
     title      String
     content    String
     metaDesc   String?
-    user       User?     @relation(fields: [userId], references: [id])
-    userId     String?
+    user       User     @relation(fields: [userId], references: [id])
+    userId     String
     created_at DateTime  @default(now())
     updated_at DateTime  @updatedAt
 }
